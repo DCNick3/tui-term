@@ -122,7 +122,8 @@ fn ui(f: &mut Frame, screen: &Screen) {
         .title(title)
         .style(Style::default().add_modifier(Modifier::BOLD));
     // let pseudo_term = PseudoTerminal::new(screen).block(block.clone());
-    let pseudo_term = PseudoTerminal::new(screen);
+    let pseudo_term =
+        PseudoTerminal::new(screen).cursor(tui_term::widget::Cursor::default().symbol(""));
     f.render_widget(pseudo_term, chunks[0]);
     // let pseudo_term = PseudoTerminal::new(screen).block(block);
     // f.render_widget(pseudo_term, chunks[1]);
