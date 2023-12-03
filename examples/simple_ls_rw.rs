@@ -25,13 +25,24 @@ fn main() -> std::io::Result<()> {
 
     let pty_system = NativePtySystem::default();
     let cwd = std::env::current_dir().unwrap();
-    let mut cmd = CommandBuilder::new("ls");
+    let mut cmd = CommandBuilder::new("bat");
+    cmd.args([
+        "Makefile",
+        "--pager=never",
+        "--style=numbers",
+        "--color=always",
+        "--line-range",
+        ("5".to_owned() + ":").as_str(),
+        "--highlight-line",
+        "2",
+    ]);
+
     cmd.cwd(cwd);
 
     let pair = pty_system
         .openpty(PtySize {
-            rows: size.rows,
-            cols: size.cols,
+            rows: size.rows - 2,
+            cols: size.cols - 2,
             pixel_width: 0,
             pixel_height: 0,
         })
@@ -98,29 +109,30 @@ fn ui(f: &mut Frame, screen: &Screen) {
         .margin(1)
         .constraints(
             [
-                ratatui::layout::Constraint::Percentage(50),
-                ratatui::layout::Constraint::Percentage(50),
+                ratatui::layout::Constraint::Percentage(100),
+                // ratatui::layout::Constraint::Percentage(50),
                 ratatui::layout::Constraint::Min(1),
             ]
             .as_ref(),
         )
         .split(f.size());
-    let title = Line::from("[ Running: ls ]");
+    let title = Line::from("[ Running: bat ]");
     let block = Block::default()
         .borders(Borders::ALL)
         .title(title)
         .style(Style::default().add_modifier(Modifier::BOLD));
-    let pseudo_term = PseudoTerminal::new(screen).block(block.clone());
+    // let pseudo_term = PseudoTerminal::new(screen).block(block.clone());
+    let pseudo_term = PseudoTerminal::new(screen);
     f.render_widget(pseudo_term, chunks[0]);
-    let pseudo_term = PseudoTerminal::new(screen).block(block);
-    f.render_widget(pseudo_term, chunks[1]);
+    // let pseudo_term = PseudoTerminal::new(screen).block(block);
+    // f.render_widget(pseudo_term, chunks[1]);
     let block = Block::default().borders(Borders::ALL);
     f.render_widget(block, f.size());
     let explanation = "Press q to exit";
     let explanation = Paragraph::new(explanation)
         .style(Style::default().add_modifier(Modifier::BOLD | Modifier::REVERSED))
         .alignment(Alignment::Center);
-    f.render_widget(explanation, chunks[2]);
+    f.render_widget(explanation, chunks[1]);
 }
 
 fn setup_terminal() -> io::Result<(Terminal<CrosstermBackend<BufWriter<io::Stdout>>>, Size)> {
